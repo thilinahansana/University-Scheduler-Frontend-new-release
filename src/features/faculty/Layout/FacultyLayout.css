@@ -1,0 +1,70 @@
+/* Faculty Layout custom styles */
+.faculty-layout {
+  min-height: 100vh;
+}
+
+.faculty-sider {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.faculty-header {
+  padding: 0 16px;
+  background: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  height: 32px;
+  margin: 16px;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.notification-badge {
+  margin-right: 16px;
+}
+
+.user-dropdown {
+  cursor: pointer;
+  padding: 0 8px;
+}
+
+.avatar {
+  background-color: #1890ff;
+}
+
+.username {
+  margin-left: 8px;
+}
+
+.trigger-button {
+  font-size: 18px;
+  padding: 0 24px;
+}
+
+.faculty-content {
+  margin: 24px 16px;
+  padding: 24px;
+  background: #fff;
+  min-height: 280px;
+  border-radius: 4px;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .username {
+    display: none;
+  }
+}
