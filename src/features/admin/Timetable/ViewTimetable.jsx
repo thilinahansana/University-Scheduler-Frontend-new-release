@@ -59,7 +59,7 @@ const ViewTimetable = () => {
     selectedAlgorithm: selectedAlgorithmFromState,
   } = useSelector((state) => state.timetable);
   const dispatch = useDispatch();
-  const algorithms = ["GA", "CO", "RL", "BC", "PSO"];
+  const algorithms = ["CO", "BC", "PSO"];
   const [nlResponse, setNlResponse] = useState("");
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState(null);
