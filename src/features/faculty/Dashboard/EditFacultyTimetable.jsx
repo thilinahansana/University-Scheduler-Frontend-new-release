@@ -346,6 +346,15 @@ const EditFacultyTimetable = ({ visible, entry, onCancel, onSubmit }) => {
     }
   };
 
+  // Sort periods from P1 to P9
+  const sortedPeriods = periods
+    ? [...periods].sort((a, b) => {
+        const aNum = parseInt(a.name.replace("P", ""));
+        const bNum = parseInt(b.name.replace("P", ""));
+        return aNum - bNum;
+      })
+    : [];
+
   // Render different form fields based on request type
   const renderRequestTypeFields = () => {
     switch (requestType) {
@@ -501,7 +510,7 @@ const EditFacultyTimetable = ({ visible, entry, onCancel, onSubmit }) => {
                         .indexOf(input.toLowerCase()) >= 0
                     }
                   >
-                    {periods?.map((period) => (
+                    {sortedPeriods.map((period) => (
                       <Option key={period.name} value={period.name}>
                         {period.long_name || period.name}
                       </Option>

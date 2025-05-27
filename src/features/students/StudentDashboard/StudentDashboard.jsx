@@ -99,6 +99,15 @@ function StudentDashboard() {
   const sortPeriods = (periods) => {
     if (!periods || !Array.isArray(periods)) return [];
     return [...periods].sort((a, b) => {
+      // For "P1", "P2" format - extract the number after P
+      if (a.name?.startsWith("P") && b.name?.startsWith("P")) {
+        const numA = parseInt(a.name.substring(1));
+        const numB = parseInt(b.name.substring(1));
+        if (!isNaN(numA) && !isNaN(numB)) {
+          return numA - numB;
+        }
+      }
+
       // If periods have numeric names like "1", "2", etc.
       const numA = parseInt(a.name);
       const numB = parseInt(b.name);
@@ -185,6 +194,7 @@ function StudentDashboard() {
     console.log("StudentDashboard useEffect - Beginning data fetch");
     dispatch(getSubjects());
     dispatch(getTeachers());
+    dispatch(getPeriods());
 
     // Create a local state variable to hold the timetable data in case Redux isn't saving it properly
     let fetchedTimetableData = null;
@@ -585,8 +595,14 @@ function StudentDashboard() {
     const sortedPeriods = sortPeriods(extractedPeriods);
     const sortedDays = sortDays(extractedDays);
 
-    // Generate table data using ONLY the matching entries
-    const dataSource = sortedPeriods.map((period, periodIndex) => {
+    // Filter out interval periods
+    const nonIntervalPeriods = sortedPeriods.filter((period) => {
+      const periodData = getPeriod(period.name);
+      return !periodData?.is_interval;
+    });
+
+    // Generate table data using ONLY the matching entries and non-interval periods
+    const dataSource = nonIntervalPeriods.map((period, periodIndex) => {
       const rowData = {
         key: periodIndex,
         period: period.long_name || period.name,
@@ -621,12 +637,30 @@ function StudentDashboard() {
         width: 150,
         fixed: "left",
         className: "period-column",
-        render: (text) => (
-          <div className="period-cell">
-            <ClockCircleOutlined style={{ marginRight: 8 }} />
-            <span className="font-medium text-gray-700">{text}</span>
-          </div>
-        ),
+        render: (text, record) => {
+          // Check if this period is an interval/break period
+          const isInterval = record.isInterval;
+          return (
+            <div
+              className={`period-cell ${isInterval ? "interval-period" : ""}`}
+            >
+              {isInterval ? (
+                <>
+                  <span className="interval-icon">🍽️</span>
+                  <span className="font-medium text-gray-700">{text}</span>
+                  <Tag color="orange" style={{ marginLeft: "8px" }}>
+                    Break
+                  </Tag>
+                </>
+              ) : (
+                <>
+                  <ClockCircleOutlined style={{ marginRight: 8 }} />
+                  <span className="font-medium text-gray-700">{text}</span>
+                </>
+              )}
+            </div>
+          );
+        },
       },
       ...sortedDays
         .filter((day) => {
@@ -787,6 +821,51 @@ function StudentDashboard() {
 
   // Get the current timetable data before using it
   const currentTimetableData = getCurrentTimetableData();
+
+  // Get Period data by period name
+  const getPeriod = (periodName) => {
+    if (!periods || !Array.isArray(periods)) return null;
+
+    return periods.find((period) => period.name === periodName);
+  };
+
+  // Map timetable entries with period data
+  const mapTimetableWithPeriodData = (entries) => {
+    if (!entries || !Array.isArray(entries)) return [];
+
+    return entries.map((entry) => {
+      // Handle case where period might be an array or a single object
+      if (Array.isArray(entry.period)) {
+        const periodsWithData = entry.period.map((p) => {
+          const periodData = getPeriod(p.name);
+          return { ...p, data: periodData };
+        });
+        return { ...entry, period: periodsWithData };
+      } else if (entry.period) {
+        const periodData = getPeriod(entry.period.name);
+        return { ...entry, period: { ...entry.period, data: periodData } };
+      }
+      return entry;
+    });
+  };
+
+  useEffect(() => {
+    // Use the mapTimetableWithPeriodData function after timetable data is loaded
+    if (
+      currentTimetableData &&
+      currentTimetableData.entries &&
+      periods &&
+      periods.length > 0
+    ) {
+      const mappedEntries = mapTimetableWithPeriodData(
+        currentTimetableData.entries
+      );
+      console.log(
+        "Mapped timetable entries with period data:",
+        mappedEntries.slice(0, 2)
+      );
+    }
+  }, [currentTimetableData, periods]);
 
   // Render the Timetable tab using only the timetable data
   const renderTimetableTab = () => {
@@ -1300,6 +1379,15 @@ function StudentDashboard() {
         .subject-card:hover {
           transform: translateY(-3px);
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .interval-period {
+          background-color: #fff7e6 !important;
+          color: #d46a08 !important;
+        }
+
+        .interval-icon {
+          margin-right: 4px;
         }
       `}</style>
     </div>

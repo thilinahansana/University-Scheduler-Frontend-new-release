@@ -262,6 +262,15 @@ const EditTimetableModal = ({
     }
   };
 
+  // Sort periods from P1 to P9
+  const sortedPeriods = periods
+    ? [...periods].sort((a, b) => {
+        const aNum = parseInt(a.name.replace("P", ""));
+        const bNum = parseInt(b.name.replace("P", ""));
+        return aNum - bNum;
+      })
+    : [];
+
   return (
     <Modal
       title="Edit Timetable Entry"
@@ -383,7 +392,7 @@ const EditTimetableModal = ({
               option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
             }
           >
-            {periods?.map((period) => (
+            {sortedPeriods.map((period) => (
               <Select.Option key={period.name} value={period.name}>
                 {period.long_name}
               </Select.Option>
